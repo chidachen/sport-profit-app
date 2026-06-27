@@ -1,5 +1,5 @@
 const PROFIT_RATE = 0.0625;
-const APP_VERSION = "v3-20260627-auto-update";
+const APP_VERSION = "official-v1.0-20260627";
 
 const fmt = n => Math.round(Number(n)||0).toLocaleString("zh-TW");
 const pct = n => `${(Number(n)||0).toFixed(2)}%`;
@@ -70,6 +70,26 @@ function addOddsRow(away="1.75", home="1.75"){
   oddsRows.appendChild(row);
 }
 
+
+function clearOddsRows(){
+  oddsRows.innerHTML = "";
+}
+
+function loadCommonOdds(){
+  clearOddsRows();
+  [
+    ["1.75","1.75"],
+    ["1.74","1.76"],
+    ["1.72","1.72"],
+    ["1.70","1.80"],
+    ["1.68","1.82"],
+    ["1.73","1.77"],
+    ["1.76","1.78"],
+    ["1.80","1.80"]
+  ].forEach(x=>addOddsRow(x[0],x[1]));
+  updateCompare();
+}
+
 function renumberRows(){
   [...oddsRows.children].forEach((row, i)=>{
     row.querySelector(".odds-row-head span").textContent = `第 ${i+1} 組`;
@@ -117,10 +137,11 @@ document.querySelectorAll(".quick button").forEach(btn=>{
 [target, awayOdds, homeOdds].forEach(x=>x.addEventListener("input", updateCalc));
 compareTarget.addEventListener("input", updateCompare);
 calcBtn.onclick = updateCalc;
+loadCommonBtn.onclick = loadCommonOdds;
 addRowBtn.onclick = () => { addOddsRow("",""); };
 compareBtn.onclick = updateCompare;
 
-[["1.75","1.75"],["1.80","1.80"],["1.85","1.85"],["1.90","1.90"]].forEach(x=>addOddsRow(x[0],x[1]));
+[["1.75","1.75"],["1.74","1.76"],["1.72","1.72"]].forEach(x=>addOddsRow(x[0],x[1]));
 
 updateCalc();
 updateCompare();

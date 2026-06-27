@@ -1,4 +1,4 @@
-const CACHE = "sport-profit-v3-20260627-auto-update";
+const CACHE = "sport-profit-official-v1-20260627";
 const FILES = [
   "./",
   "./index.html",

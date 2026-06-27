@@ -31,3 +31,5 @@ input{width:100%;margin-top:8px;background:#0f1726;color:var(--text);border:1px 
 .remove{background:transparent;color:#fb7185;border:0;font-size:15px}
 .odds-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rank{font-size:14px;color:var(--muted);margin-bottom:8px}
+
+.version{text-align:center;color:var(--muted);font-size:12px;margin-top:20px;padding-bottom:12px}
