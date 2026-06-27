@@ -1,0 +1,9 @@
+{
+  "name": "運彩衝業績助手",
+  "short_name": "衝業績",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": []
+}
