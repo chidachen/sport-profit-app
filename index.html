@@ -4,15 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>運彩衝業績助手</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260627" />
 </head>
 <body>
   <main class="app">
     <header>
       <h1>運彩衝業績助手</h1>
-      <p>固定利潤率 6.25%｜iPhone 版</p>
+      <p>固定利潤率 6.25%｜自動更新版</p>
     </header>
 
     <nav class="tabs">
@@ -42,7 +43,6 @@
         <div class="fixed-rate">固定利潤率：<b>6.25%</b></div>
         <button id="calcBtn" class="primary">開始計算</button>
       </div>
-
       <div id="result"></div>
     </section>
 
@@ -51,17 +51,14 @@
         <label>比較目標業績
           <input id="compareTarget" type="number" inputmode="decimal" value="500000" />
         </label>
-
         <div id="oddsRows"></div>
-
         <button id="addRowBtn" class="secondary">＋ 新增一組賠率</button>
         <button id="compareBtn" class="primary">比較並排序</button>
       </div>
-
       <div id="compareResult"></div>
     </section>
   </main>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260627"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 const PROFIT_RATE = 0.0625;
+const APP_VERSION = "v3-20260627-auto-update";
 
 const fmt = n => Math.round(Number(n)||0).toLocaleString("zh-TW");
 const pct = n => `${(Number(n)||0).toFixed(2)}%`;
@@ -8,7 +9,6 @@ function calc(target, awayOdds, homeOdds){
   awayOdds = Number(awayOdds);
   homeOdds = Number(homeOdds);
   if(!target || !awayOdds || !homeOdds) return null;
-
   const awayBet = target * homeOdds / (awayOdds + homeOdds);
   const homeBet = target - awayBet;
   const awayReturn = awayBet * awayOdds;
@@ -19,7 +19,6 @@ function calc(target, awayOdds, homeOdds){
   const profit = target * PROFIT_RATE;
   const loss = hedgeLoss - profit;
   const lossRate = loss / target * 100;
-
   return {target, awayOdds, homeOdds, awayBet, homeBet, awayReturn, homeReturn, safeReturn, payoutRate, hedgeLoss, profit, loss, lossRate};
 }
 
@@ -127,5 +126,24 @@ updateCalc();
 updateCompare();
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+  window.addEventListener("load", async ()=>{
+    const reg = await navigator.serviceWorker.register("./sw.js?v=20260627");
+    if(reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
+    reg.addEventListener("updatefound", ()=>{
+      const worker = reg.installing;
+      worker?.addEventListener("statechange", ()=>{
+        if(worker.state === "installed" && navigator.serviceWorker.controller){
+          worker.postMessage({type:"SKIP_WAITING"});
+          setTimeout(()=>location.reload(), 500);
+        }
+      });
+    });
+  });
+
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+    if(!window.__reloading){
+      window.__reloading = true;
+      location.reload();
+    }
+  });
 }
