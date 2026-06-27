@@ -1,9 +1,12 @@
+const PROFIT_RATE = 0.0625;
+
 const fmt = n => Math.round(Number(n)||0).toLocaleString("zh-TW");
 const pct = n => `${(Number(n)||0).toFixed(2)}%`;
 
-function calc(target, awayOdds, homeOdds, profitRatePct){
-  target = Number(target); awayOdds = Number(awayOdds); homeOdds = Number(homeOdds);
-  const profitRate = Number(profitRatePct) / 100;
+function calc(target, awayOdds, homeOdds){
+  target = Number(target);
+  awayOdds = Number(awayOdds);
+  homeOdds = Number(homeOdds);
   if(!target || !awayOdds || !homeOdds) return null;
 
   const awayBet = target * homeOdds / (awayOdds + homeOdds);
@@ -11,57 +14,85 @@ function calc(target, awayOdds, homeOdds, profitRatePct){
   const awayReturn = awayBet * awayOdds;
   const homeReturn = homeBet * homeOdds;
   const safeReturn = Math.min(awayReturn, homeReturn);
+  const payoutRate = safeReturn / target * 100;
   const hedgeLoss = target - safeReturn;
-  const profit = target * profitRate;
-  const netCost = hedgeLoss - profit;
-  const netRate = netCost / target * 100;
+  const profit = target * PROFIT_RATE;
+  const loss = hedgeLoss - profit;
+  const lossRate = loss / target * 100;
 
-  return {target, awayOdds, homeOdds, awayBet, homeBet, awayReturn, homeReturn, hedgeLoss, profit, netCost, netRate};
+  return {target, awayOdds, homeOdds, awayBet, homeBet, awayReturn, homeReturn, safeReturn, payoutRate, hedgeLoss, profit, loss, lossRate};
 }
 
 function renderResult(r){
-  if(!r) return "<div class='card'>請輸入正確數字</div>";
-  const netClass = r.netCost <= 0 ? "positive" : "warning";
-  return `<div class="card">
+  if(!r) return "<div class='result-card'>請輸入正確數字</div>";
+  const lossClass = r.loss <= 0 ? "good" : "bad";
+  return `<div class="result-card">
     <div class="grid">
+      <div class="item full info"><small>獎金支出率</small><b>${pct(r.payoutRate)}</b></div>
       <div class="item"><small>客隊下注</small><b>${fmt(r.awayBet)}</b></div>
       <div class="item"><small>主隊下注</small><b>${fmt(r.homeBet)}</b></div>
       <div class="item"><small>客勝回收</small><b>${fmt(r.awayReturn)}</b></div>
       <div class="item"><small>主勝回收</small><b>${fmt(r.homeReturn)}</b></div>
       <div class="item"><small>對沖損失</small><b>${fmt(r.hedgeLoss)}</b></div>
       <div class="item"><small>利潤 6.25%</small><b>${fmt(r.profit)}</b></div>
-      <div class="item full ${netClass}"><small>淨成本</small><b>${fmt(r.netCost)}</b></div>
-      <div class="item full ${netClass}"><small>淨成本率</small><b>${pct(r.netRate)}</b></div>
+      <div class="item full ${lossClass}"><small>損失</small><b>${fmt(r.loss)}</b></div>
+      <div class="item full ${lossClass}"><small>損失率</small><b>${pct(r.lossRate)}</b></div>
     </div>
   </div>`;
 }
 
 function updateCalc(){
-  const r = calc(target.value, awayOdds.value, homeOdds.value, profitRate.value);
+  const r = calc(target.value, awayOdds.value, homeOdds.value);
   result.innerHTML = renderResult(r);
-  localStorage.setItem("sportCalc", JSON.stringify({
-    target: target.value, awayOdds: awayOdds.value, homeOdds: homeOdds.value, profitRate: profitRate.value
-  }));
+}
+
+function addOddsRow(away="1.75", home="1.75"){
+  const row = document.createElement("div");
+  row.className = "odds-row";
+  row.innerHTML = `
+    <div class="odds-row-head">
+      <span>第 ${oddsRows.children.length + 1} 組</span>
+      <button class="remove" type="button">刪除</button>
+    </div>
+    <div class="odds-inputs">
+      <label>客隊賠率
+        <input class="cmp-away" type="number" inputmode="decimal" step="0.01" value="${away}">
+      </label>
+      <label>主隊賠率
+        <input class="cmp-home" type="number" inputmode="decimal" step="0.01" value="${home}">
+      </label>
+    </div>`;
+  row.querySelector(".remove").onclick = () => {
+    row.remove();
+    renumberRows();
+    updateCompare();
+  };
+  row.querySelectorAll("input").forEach(i => i.addEventListener("input", updateCompare));
+  oddsRows.appendChild(row);
+}
+
+function renumberRows(){
+  [...oddsRows.children].forEach((row, i)=>{
+    row.querySelector(".odds-row-head span").textContent = `第 ${i+1} 組`;
+  });
 }
 
 function updateCompare(){
   const t = Number(compareTarget.value);
-  const rate = Number(profitRate.value || 6.25);
-  const rows = oddsList.value.split(/\n+/).map(line => {
-    const nums = line.match(/\d+(\.\d+)?/g);
-    if(!nums || nums.length < 2) return null;
-    return calc(t, nums[0], nums[1], rate);
-  }).filter(Boolean).sort((a,b)=>a.netCost-b.netCost);
+  const rows = [...oddsRows.children].map(row=>{
+    return calc(t, row.querySelector(".cmp-away").value, row.querySelector(".cmp-home").value);
+  }).filter(Boolean).sort((a,b)=>a.loss-b.loss);
 
   compareResult.innerHTML = rows.map((r,i)=>`
     <div class="compare-card">
       <div class="rank">#${i+1}　客 ${r.awayOdds} / 主 ${r.homeOdds}</div>
       <div class="grid">
+        <div class="item full info"><small>獎金支出率</small><b>${pct(r.payoutRate)}</b></div>
         <div class="item"><small>客隊下注</small><b>${fmt(r.awayBet)}</b></div>
         <div class="item"><small>主隊下注</small><b>${fmt(r.homeBet)}</b></div>
         <div class="item"><small>對沖損失</small><b>${fmt(r.hedgeLoss)}</b></div>
         <div class="item"><small>利潤</small><b>${fmt(r.profit)}</b></div>
-        <div class="item full ${r.netCost<=0?'positive':'warning'}"><small>淨成本</small><b>${fmt(r.netCost)}（${pct(r.netRate)}）</b></div>
+        <div class="item full ${r.loss<=0?'good':'bad'}"><small>損失</small><b>${fmt(r.loss)}（${pct(r.lossRate)}）</b></div>
       </div>
     </div>
   `).join("");
@@ -75,17 +106,23 @@ document.querySelectorAll(".tab").forEach(btn=>{
   };
 });
 
-try{
-  const saved = JSON.parse(localStorage.getItem("sportCalc")||"{}");
-  if(saved.target) target.value=saved.target;
-  if(saved.awayOdds) awayOdds.value=saved.awayOdds;
-  if(saved.homeOdds) homeOdds.value=saved.homeOdds;
-  if(saved.profitRate) profitRate.value=saved.profitRate;
-}catch(e){}
+document.querySelectorAll(".quick button").forEach(btn=>{
+  btn.onclick=()=>{
+    target.value = btn.dataset.target;
+    compareTarget.value = btn.dataset.target;
+    updateCalc();
+    updateCompare();
+  };
+});
 
+[target, awayOdds, homeOdds].forEach(x=>x.addEventListener("input", updateCalc));
+compareTarget.addEventListener("input", updateCompare);
 calcBtn.onclick = updateCalc;
+addRowBtn.onclick = () => { addOddsRow("",""); };
 compareBtn.onclick = updateCompare;
-[target, awayOdds, homeOdds, profitRate].forEach(x=>x.addEventListener("input", updateCalc));
+
+[["1.75","1.75"],["1.80","1.80"],["1.85","1.85"],["1.90","1.90"]].forEach(x=>addOddsRow(x[0],x[1]));
+
 updateCalc();
 updateCompare();
 

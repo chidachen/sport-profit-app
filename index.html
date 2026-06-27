@@ -22,6 +22,14 @@
 
     <section id="calc" class="page active">
       <div class="card">
+        <div class="quick">
+          <button data-target="100000">10萬</button>
+          <button data-target="200000">20萬</button>
+          <button data-target="300000">30萬</button>
+          <button data-target="500000">50萬</button>
+          <button data-target="1000000">100萬</button>
+        </div>
+
         <label>目標業績
           <input id="target" type="number" inputmode="decimal" value="500000" />
         </label>
@@ -31,30 +39,26 @@
         <label>主隊賠率
           <input id="homeOdds" type="number" inputmode="decimal" step="0.01" value="1.75" />
         </label>
-        <label>利潤率
-          <input id="profitRate" type="number" inputmode="decimal" step="0.01" value="6.25" />
-        </label>
+        <div class="fixed-rate">固定利潤率：<b>6.25%</b></div>
         <button id="calcBtn" class="primary">開始計算</button>
       </div>
 
-      <div id="result" class="result"></div>
+      <div id="result"></div>
     </section>
 
     <section id="compare" class="page">
       <div class="card">
-        <label>目標業績
+        <label>比較目標業績
           <input id="compareTarget" type="number" inputmode="decimal" value="500000" />
         </label>
-        <label>貼上多組賠率（每行一組：客隊 主隊）
-          <textarea id="oddsList" rows="8">1.75 1.75
-1.80 1.80
-1.85 1.85
-1.90 1.90</textarea>
-        </label>
+
+        <div id="oddsRows"></div>
+
+        <button id="addRowBtn" class="secondary">＋ 新增一組賠率</button>
         <button id="compareBtn" class="primary">比較並排序</button>
       </div>
 
-      <div id="compareResult" class="compare"></div>
+      <div id="compareResult"></div>
     </section>
   </main>
 
